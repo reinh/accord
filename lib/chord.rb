@@ -65,6 +65,12 @@ class Chord
     @intervals = intervals
   end
   
+  def include?(*names)
+    names.all? do |name|
+      @intervals.include?(Interval[name])
+    end
+  end
+  
   def inspect
     name = root.to_s
     name << 'm' if minor?
@@ -73,26 +79,26 @@ class Chord
     name
   end
   
-  def major?
-    return false if augmented?
-    @intervals.include?(4)
-  end
-  
   def minor?
     return false if major? or diminished?
-    @intervals.include?(3)
+    include?(:m3)
+  end
+  
+  def major?
+    return false if augmented?
+    include?(:M3)
   end
   
   def diminished?
-    @intervals.include?(3) and @intervals.include?(6)
+    include?(:m3, :dim5)
   end
   
   def augmented?
-    @intervals.include?(4) and @intervals.include?(8)
+    include?(:M3, :aug5)
   end
   
   def seventh?
-    @intervals.include?(10)
+    include?(:m7)
   end
   
   def minor_seventh?
@@ -104,6 +110,6 @@ class Chord
   end
   
   def major_seventh?
-    major? and @intervals.include?(11)
+    major? and include?(:M7)
   end
 end
