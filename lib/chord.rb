@@ -2,7 +2,11 @@ class Pitch
   include Comparable
   
   def self.for(pitch)
-    PITCH_CLASSES.detect { |pc| pc.name == pitch || pc.ord == pitch % 12 }
+    PITCH_CLASSES.detect { |pc| pc.ord == pitch % 12 }
+  end
+  
+  def self.by_name(name)
+    PITCH_CLASSES.detect {|pc| pc.name == name }
   end
   
   attr_reader :name, :ord
@@ -18,7 +22,7 @@ class Pitch
   end
   
   def to_s
-    str = name.to_s.upcase
+    str = name.to_s[0,1].upcase
     str << "#" if sharp?
     str
   end
@@ -49,8 +53,9 @@ module Interval
     :M6   => 9,
     :m7   => 10,
     :M7   => 11,
-    :m9   => 13,
-    :M9   => 14
+    :b9   => 13,
+    :M9   => 14,
+    :s9   => 15
   }
   
   def self.[](name)
@@ -58,27 +63,7 @@ module Interval
   end
 end
 
-class Chord
-  attr_reader :root
-  def initialize(root, intervals)
-    @root = Pitch.for(root)
-    @intervals = intervals
-  end
-  
-  def include?(*names)
-    names.all? do |name|
-      @intervals.include?(Interval[name])
-    end
-  end
-  
-  def inspect
-    name = root.to_s
-    name << 'm' if minor?
-    name << 'dim' if diminished?
-    name << 'aug' if augmented?
-    name
-  end
-  
+module Qualities
   def minor?
     return false if major? or diminished?
     include?(:m3)
@@ -98,6 +83,7 @@ class Chord
   end
   
   def seventh?
+    return false if extensions?
     include?(:m7)
   end
   
@@ -110,10 +96,64 @@ class Chord
   end
   
   def major_seventh?
+    return false if extensions?
     major? and include?(:M7)
   end
   
   def minor_major_seventh?
+    return false if extensions?
     minor? and include?(:M7)
+  end
+  
+  def extensions?
+    flat_nine?   ||
+    ninth?       ||
+    sharp_nine?
+  end
+  
+  def flat_nine?
+    include?(:b9)
+  end
+  
+  def ninth?
+    include?(:M9)
+  end
+  
+  def sharp_nine?
+    include?(:s9)
+  end
+  
+end
+
+class Chord
+  include Qualities
+  
+  attr_reader :root
+  def initialize(root, intervals)
+    @root = Pitch.by_name(root)
+    @intervals = intervals
+  end
+  
+  def include?(*names)
+    names.all? do |name|
+      @intervals.include?(Interval[name])
+    end
+  end
+  
+  def transposed_intervals(base_ord = 0)
+    @intervals.map{|i| i + @root.ord + base_ord}
+  end
+  
+  def inspect
+    name = root.to_s
+    name << '-'  if minor? # C-
+    name << '-5' if diminished? # C-5
+    name << '+5' if augmented?
+    name << '7'  if seventh?
+    name << 'M7' if include?(:M7)
+    name << '7b9'if flat_nine?
+    name << '9'  if ninth?
+    name << '7+9'if sharp_nine?
+    name
   end
 end
