@@ -112,4 +112,8 @@ class Chord
   def major_seventh?
     major? and include?(:M7)
   end
+  
+  def minor_major_seventh?
+    minor? and include?(:M7)
+  end
 end

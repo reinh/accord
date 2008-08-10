@@ -118,7 +118,24 @@ describe "C major seventh" do
   it_should_behave_like "C root"
   it_should_behave_like "major"
   
-  it "has a major seventh" do
+  it "is a major seventh" do
     @chord.should be_major_seventh
+  end
+end
+
+describe "C minor major seventh" do
+  before(:each) do
+    @chord = Chord.new(:c, [0,3,7,11])
+  end
+
+  it_should_behave_like "C root"
+  it_should_behave_like "minor"
+  
+  it "has a major seventh" do
+    @chord.include?(:M7).should be_true
+  end
+  
+  it "is a minor major seventh" do
+    @chord.should be_minor_major_seventh
   end
 end
