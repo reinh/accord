@@ -12,6 +12,28 @@ describe Pitch do
   end
 end
 
+describe Chord do
+  describe "#==" do
+    it "is true if the root and intervals are the same for both chords" do
+      Chord.new(:c, [0,4,7]).should == Chord.new(:c, [0,4,7])
+    end
+  end
+  
+  describe "#transposed_intervals" do
+    before(:each) do
+      @chord = Chord.new(:d, [0,8])
+    end
+  
+    it "transposes the intervals based on the root" do
+      @chord.transposed_intervals.should == [2,10]
+    end
+    
+    it "transposes the intervals based on the root and a given ordinal" do
+      @chord.transposed_intervals(1).should == [3,11]
+    end
+  end
+end
+
 describe "C root", :shared => true do
   it 'has the root of "C"' do
     @chord.root.should == Pitch.new(:c, 0)
@@ -251,20 +273,4 @@ describe "C7+9" do
   it 'inspects as "C7+9"' do
     @chord.inspect.should == "C7+9"
   end  
-end
-
-describe Chord do
-  describe "#transposed_intervals" do
-    before(:each) do
-      @chord = Chord.new(:d, [0,8])
-    end
-  
-    it "transposes the intervals based on the root" do
-      @chord.transposed_intervals.should == [2,10]
-    end
-    
-    it "transposes the intervals based on the root and a given ordinal" do
-      @chord.transposed_intervals(1).should == [3,11]
-    end
-  end
 end

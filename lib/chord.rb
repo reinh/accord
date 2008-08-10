@@ -128,12 +128,21 @@ end
 class Chord
   include Qualities
   
-  attr_reader :root
+  attr_reader :root, :intervals
   def initialize(root, intervals)
     @root = Pitch.by_name(root)
     @intervals = intervals
   end
   
+  def ==(other)
+    [root, intervals] == [other.root, other.intervals]
+  end
+  
+  def +(other)
+    all_intervals = intervals | other.transposed_intervals(root.ord)
+    Chord.new(root.name, all_intervals)
+  end
+
   def include?(*names)
     names.all? do |name|
       @intervals.include?(Interval[name])
